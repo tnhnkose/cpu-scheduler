@@ -58,6 +58,21 @@ check("RR(q=2) - B", B, rr2, "idle 0-2, P1 2-4, P2 4-5, P1 5-6, idle 6-8, P3 8-1
 const EDGE = make([["P1", 0, 3], ["P2", 2, 1]]);
 check("RR(q=2) - sınırda varış", EDGE, rr2, "P1 0-2, P2 2-3, P1 3-4", [2.5, 0.5, 0]);
 
+// ===== Raporun 3. bölümündeki öğrenci test senaryoları =====
+// T1: CPU boşta kalıyor (0-1 ve 3-6)
+const T1 = make([["P1", 1, 2], ["P2", 6, 3], ["P3", 7, 1]]);
+check("T1 idle - FCFS", T1, fcfs, "idle 0-1, P1 1-3, idle 3-6, P2 6-9, P3 9-10", [8 / 3, 2 / 3, 2 / 3]);
+check("T1 idle - RR(q=2)", T1, rr2, "idle 0-1, P1 1-3, idle 3-6, P2 6-8, P3 8-9, P2 9-10", [8 / 3, 2 / 3, 1 / 3]);
+// T2: üç süreç aynı anda geliyor; P1 ve P2'nin burst'ü de eşit -> girdi sırası belirler
+const T2 = make([["P1", 0, 3], ["P2", 0, 3], ["P3", 0, 1]]);
+check("T2 tie - FCFS", T2, fcfs, "P1 0-3, P2 3-6, P3 6-7", [16 / 3, 3, 3]);
+check("T2 tie - SJF", T2, sjf, "P3 0-1, P1 1-4, P2 4-7", [4, 5 / 3, 5 / 3]);
+check("T2 tie - RR(q=2)", T2, rr2, "P1 0-2, P2 2-4, P3 4-5, P1 5-6, P2 6-7", [6, 11 / 3, 2]);
+// T3: SRTF çalışan süreci kesiyor (t=2'de P2, P1'i keser); t=3'te P3 kesmez
+const T3 = make([["P1", 0, 6], ["P2", 2, 2], ["P3", 3, 3]]);
+check("T3 preempt - SJF", T3, sjf, "P1 0-6, P2 6-8, P3 8-11", [20 / 3, 3, 3]);
+check("T3 preempt - SRTF", T3, srtf, "P1 0-2, P2 2-4, P3 4-7, P1 7-11", [17 / 3, 2, 1 / 3]);
+
 // ===== 2) Girdi doğrulama testleri =====
 // Her satır: [test adı, süreç satırları, quantum, hata bekleniyor mu?]
 const P = (id, arrival, burst) => ({ id, arrival, burst });
